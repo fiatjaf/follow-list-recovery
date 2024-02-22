@@ -8,8 +8,13 @@
   const formatter = new Intl.DateTimeFormat(undefined, {dateStyle: 'medium'})
 
   type Epoch = {epoch: number; keys: string[]}
+  type ActionableEpoch = {
+    epoch: number
+    keys: {pubkey: string; selected: boolean}[]
+  }
 
   let epochs: Epoch[] = []
+  let actionable: ActionableEpoch[] = []
 
   onMount(() => {
     signer.getPublicKey().then(async pubkey => {
@@ -50,15 +55,17 @@
           onclose() {
             let visited: string[] = []
             epochs.sort((a, b) => b.epoch - a.epoch)
-            epochs = epochs
-              .map(epoch => {
-                epoch.keys = epoch.keys.filter(pubkey => {
-                  if (visited.includes(pubkey)) return false
-                  visited.push(pubkey)
-                  return true
-                })
-                return epoch
-              })
+            actionable = epochs
+              .map(epoch => ({
+                epoch: epoch.epoch,
+                keys: epoch.keys
+                  .filter(pubkey => {
+                    if (visited.includes(pubkey)) return false
+                    visited.push(pubkey)
+                    return true
+                  })
+                  .map(pubkey => ({pubkey, selected: false}))
+              }))
               .filter(({keys}) => keys.length > 0)
               .slice(1)
           }
@@ -91,7 +98,7 @@
     </div>
   </div>
   <div class="md:mt-6">
-    {#each epochs as epoch}
+    {#each actionable as epoch}
       <div class="border-b py-6">
         <div class="text-right pb-4">
           people you were following up to <b class="font-bold"
@@ -99,9 +106,23 @@
           ><span class="hidden md:inline">&nbsp;but not anymore</span>
         </div>
         <div class="flex flex-wrap">
-          {#each epoch.keys as pubkey}
-            <div class="ml-2 mt-1">
-              <UserLabel {pubkey} />
+          {#each epoch.keys as e}
+            <div
+              class="ml-2 mt-1 group flex items-center rounded"
+              class:border={e.selected}
+              class:bg-stone-400={e.selected}
+              class:px-2={e.selected}
+              class:py-1={e.selected}
+            >
+              <input
+                class="mr-1 group-hover:block w-6 h-6 text-4xl"
+                class:hidden={!e.selected}
+                type="checkbox"
+                on:change={() => {
+                  e.selected = true
+                }}
+              />
+              <UserLabel pubkey={e.pubkey} />
             </div>
           {/each}
         </div>
