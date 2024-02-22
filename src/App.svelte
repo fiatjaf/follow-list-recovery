@@ -131,7 +131,7 @@
     {message}
   </div>
 {:else}
-  <div class="flex flex-col md:flex-row">
+  <div class="flex flex-col md:flex-row max-w-7xl m-auto">
     <div class="w-full md:w-40 md:mr-8">
       <div class="mb-2 md:mb-8 text-center md:text-left text-3xl font-bold">
         recover your contacts
