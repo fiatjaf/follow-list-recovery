@@ -10,7 +10,6 @@
   type Epoch = {epoch: number; keys: string[]}
 
   let epochs: Epoch[] = []
-  let keys: {[pubkey: string]: Epoch} = {}
 
   onMount(() => {
     signer.getPublicKey().then(async pubkey => {
@@ -39,31 +38,42 @@
             if (!curr) {
               curr = {epoch: evt.created_at, keys: []}
               epochs.push(curr)
-              epochs = epochs.map(e => {
-                e.keys = e.keys
-                return e
-              })
             }
 
             for (let i = 0; i < evt.tags.length; i++) {
               let [name, pubkey] = evt.tags[i]
               if (name === 'p' && pubkey) {
-                let prev = keys[pubkey]
-                if (prev && prev.epoch < curr.epoch) {
-                  let idx = prev.keys.indexOf(pubkey)
-                  prev.keys.splice(idx, 1)
-                }
                 curr.keys.push(pubkey)
-                keys[pubkey] = curr
               }
             }
           },
           onclose() {
+            let visited: string[] = []
             epochs.sort((a, b) => b.epoch - a.epoch)
-            epochs = epochs.map(e => {
-              e.keys = e.keys
-              return e
-            })
+            epochs = epochs
+              .map(epoch => {
+                epoch.keys = epoch.keys.filter(pubkey => {
+                  if (
+                    pubkey ===
+                    'd1d1747115d16751a97c239f46ec1703292c3b7e9988b9ebdd4ec4705b15ed44'
+                  ) {
+                    console.log('visiting', visited.includes(pubkey))
+                  }
+
+                  if (visited.includes(pubkey)) return false
+                  visited.push(pubkey)
+                  if (
+                    pubkey ===
+                    'd1d1747115d16751a97c239f46ec1703292c3b7e9988b9ebdd4ec4705b15ed44'
+                  ) {
+                    console.log('pushing', pubkey)
+                  }
+                  return true
+                })
+                return epoch
+              })
+              .filter(({keys}) => keys.length > 0)
+              .slice(1)
           }
         }
       )
@@ -80,7 +90,7 @@
 </script>
 
 <div class="flex">
-  <div class="w-40">
+  <div class="w-40 mr-8">
     <div class="mb-6">
       <a href="/" class="text-3xl mb-2 font-bold hover:underline"
         >recover your contacts</a
@@ -92,10 +102,14 @@
       {/if}
     </div>
   </div>
-  <div>
+  <div class="mt-6">
     {#each epochs as epoch}
-      <div class="border-y">
-        <div>{formatDate(epoch.epoch)}</div>
+      <div class="border-b py-6">
+        <div class="text-right pb-4">
+          people you were following up to <b class="font-bold"
+            >{formatDate(epoch.epoch)}</b
+          > but are not anymore
+        </div>
         <div class="flex flex-wrap">
           {#each epoch.keys as pubkey}
             <div class="ml-2 mt-1">

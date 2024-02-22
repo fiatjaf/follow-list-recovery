@@ -2,7 +2,7 @@
   import {onMount} from 'svelte'
   import * as nip19 from 'nostr-tools/nip19'
 
-  import {getMetadata, type Metadata} from '../lib/nostr.ts'
+  import {getMetadata, type Metadata} from '../lib/nostr'
 
   export let pubkey: string
   let metadata: Metadata
@@ -21,9 +21,9 @@
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions a11y-click-events-have-key-events -->
-<div
+<a
   class="flex items-center cursor-pointer"
-  on:click={() => window.open('https://nosta.me/' + pubkey)}
+  href={'https://nosta.me/' + pubkey}
   title={npub}
 >
   <div class="h-6 mr-1">
@@ -45,9 +45,9 @@
     {/if}
   </div>
   <div
-    class="text-ellipsis overflow-hidden text-rose-300 text-lg pl-1"
+    class="text-ellipsis overflow-hidden text-emerald-200 text-lg pl-1"
     title={npub}
   >
     {name}
   </div>
-</div>
+</a>
