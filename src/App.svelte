@@ -1,17 +1,16 @@
 <script lang="ts">
   import {onMount} from 'svelte'
-  import {npubEncode} from 'nostr-tools/nip19'
 
-  import UserLabel from '../components/UserLabel.svelte'
-  import {account, signer, pool, getWriteRelays} from '../lib/nostr.ts'
+  import UserLabel from './components/UserLabel.svelte'
+  import {account, signer, pool, getWriteRelays} from './lib/nostr'
 
   const DAY = 60 * 60 * 24
-  const formatter = new Intl.DateFormat(undefined, {dateStyle: 'medium'})
+  const formatter = new Intl.DateTimeFormat(undefined, {dateStyle: 'medium'})
 
   type Epoch = {epoch: number; keys: string[]}
 
   let epochs: Epoch[] = []
-  let keys: {[pubkey: number]: Epoch} = {}
+  let keys: {[pubkey: string]: Epoch} = {}
 
   onMount(() => {
     signer.getPublicKey().then(async pubkey => {
@@ -72,7 +71,7 @@
   })
 
   function formatDate(ts: number) {
-    let d = new Date(epoch.epoch * 1000)
+    let d = new Date(ts * 1000)
     d.setHours(0)
     d.setMinutes(0)
     d.setSeconds(0)

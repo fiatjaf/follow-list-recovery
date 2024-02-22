@@ -1,4 +1,3 @@
-requirePragma: false
 semi: false
 arrowParens: avoid
 insertPragma: false
