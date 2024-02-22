@@ -98,22 +98,6 @@ export const repositoryRelays = [
   'wss://relay.damus.io'
 ]
 
-export async function publish(
-  unsignedEvent: EventTemplate,
-  relay: string | string[]
-): Promise<void> {
-  const event = await signer.signEvent(unsignedEvent)
-  if (Array.isArray(relay)) {
-    relay.forEach(async url => {
-      const r = await pool.ensureRelay(url)
-      await r.publish(event)
-    })
-  } else {
-    const r = await pool.ensureRelay(relay)
-    await r.publish(event)
-  }
-}
-
 const metadataLoader = new DataLoader<string, Metadata, string>(
   async keys =>
     new Promise(async resolve => {
