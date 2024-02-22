@@ -16,6 +16,12 @@
   let epochs: Epoch[] = []
   let actionable: ActionableEpoch[] = []
 
+  $: allSelected = actionable
+    .map(({keys}) =>
+      keys.filter(({selected}) => selected).map(({pubkey}) => pubkey)
+    )
+    .flat()
+
   onMount(() => {
     signer.getPublicKey().then(async pubkey => {
       let relays = await getWriteRelays(pubkey)
@@ -98,12 +104,41 @@
     </div>
   </div>
   <div class="md:mt-6">
+    <div class="mb-2 md:mb-6">
+      <button
+        class="px-4 py-2 bg-cyan-500 rounded cursor-pointer hover:bg-cyan-600 text-2xl font-bold"
+        class:invisible={allSelected.length === 0}
+        >follow {allSelected.length} back</button
+      >
+    </div>
     {#each actionable as epoch}
       <div class="border-b py-6">
-        <div class="text-right pb-4">
-          people you were following up to <b class="font-bold"
-            >{formatDate(epoch.epoch)}</b
-          ><span class="hidden md:inline">&nbsp;but not anymore</span>
+        <div class="flex justify-between">
+          <div>
+            <button
+              class="px-2 py-1 cursor-pointer border border-stone-400 hover:bg-stone-300 rounded"
+              on:click={() => {
+                let toggle = epoch.keys.every(({selected}) => selected)
+                  ? false
+                  : true
+                epoch.keys.forEach(e => {
+                  e.selected = toggle
+                })
+                epoch.keys = epoch.keys
+              }}
+            >
+              {#if epoch.keys.every(({selected}) => selected)}
+                select none
+              {:else}
+                select all
+              {/if}
+            </button>
+          </div>
+          <div class="text-right pb-4">
+            people you were following up to <b class="font-bold"
+              >{formatDate(epoch.epoch)}</b
+            ><span class="hidden md:inline">&nbsp;but not anymore</span>
+          </div>
         </div>
         <div class="flex flex-wrap">
           {#each epoch.keys as e}
@@ -115,12 +150,10 @@
               class:py-1={e.selected}
             >
               <input
+                type="checkbox"
                 class="mr-1 group-hover:block w-6 h-6 text-4xl"
                 class:hidden={!e.selected}
-                type="checkbox"
-                on:change={() => {
-                  e.selected = true
-                }}
+                bind:checked={e.selected}
               />
               <UserLabel pubkey={e.pubkey} />
             </div>
