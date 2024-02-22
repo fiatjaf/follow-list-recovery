@@ -53,21 +53,8 @@
             epochs = epochs
               .map(epoch => {
                 epoch.keys = epoch.keys.filter(pubkey => {
-                  if (
-                    pubkey ===
-                    'd1d1747115d16751a97c239f46ec1703292c3b7e9988b9ebdd4ec4705b15ed44'
-                  ) {
-                    console.log('visiting', visited.includes(pubkey))
-                  }
-
                   if (visited.includes(pubkey)) return false
                   visited.push(pubkey)
-                  if (
-                    pubkey ===
-                    'd1d1747115d16751a97c239f46ec1703292c3b7e9988b9ebdd4ec4705b15ed44'
-                  ) {
-                    console.log('pushing', pubkey)
-                  }
                   return true
                 })
                 return epoch
@@ -89,26 +76,27 @@
   }
 </script>
 
-<div class="flex">
-  <div class="w-40 mr-8">
-    <div class="mb-6">
-      <a href="/" class="text-3xl mb-2 font-bold hover:underline"
-        >recover your contacts</a
-      >
+<div class="flex flex-col md:flex-row">
+  <div class="w-full md:w-40 md:mr-8">
+    <div class="mb-2 md:mb-8 text-center md:text-left text-3xl font-bold">
+      recover your contacts
     </div>
-    <div>
+    <div class="hidden md:block">
       {#if $account}
         <UserLabel pubkey={$account.pubkey} />
       {/if}
     </div>
+    <div class="hidden md:block mt-6 text-xl font-bold">
+      these are people you have stopped following recently, perhaps unwillingly
+    </div>
   </div>
-  <div class="mt-6">
+  <div class="md:mt-6">
     {#each epochs as epoch}
       <div class="border-b py-6">
         <div class="text-right pb-4">
           people you were following up to <b class="font-bold"
             >{formatDate(epoch.epoch)}</b
-          > but are not anymore
+          ><span class="hidden md:inline">&nbsp;but not anymore</span>
         </div>
         <div class="flex flex-wrap">
           {#each epoch.keys as pubkey}
